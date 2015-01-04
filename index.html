@@ -1,0 +1,29 @@
+<!doctype html>
+<head>
+	<style>
+	/* latin */
+	@font-face {
+	  font-family: 'Magra';
+	  font-style: normal;
+	  font-weight: 700;
+	  src: local('Magra Bold'), local('Magra-Bold'), url(fonts/Magra.woff2) format('woff2');
+  	unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+	}
+
+	@font-face {
+	  font-family: 'CompleteInHim';
+	  font-style: normal;
+	  font-weight: 700;
+	  src: url(fonts/CompleteInHim.ttf);
+	}
+	</style>
+</head>
+<body>
+	<div style="position: absolute;">
+		<canvas id="viewport" style="border: 1px solid #000;"></canvas>
+		<div id="score" style="position: absolute;display: none;top: 10px;left: 750px;font-size: 40px;font-family: 'Magra';letter-spacing: .05em;">0</div>
+		<div id="play" style="position: absolute;top: 100px;left: 150px;font-size: 40px;font-family: 'CompleteInHim';letter-spacing: .05em;">Press SPACEBAR to start</div>
+	</div>
+	<script type="text/javascript" src="keyCodes.js"></script>
+	<script type="text/javascript" src="game.js"></script>
+</body>
