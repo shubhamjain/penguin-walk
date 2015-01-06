@@ -19,10 +19,10 @@
 	</style>
 </head>
 <body>
-	<div style="position: absolute;">
+	<div id="main_game" style="position: absolute;display:none;">
 		<canvas id="viewport" style="border: 1px solid #000;"></canvas>
-		<div id="score" style="position: absolute;display: none;top: 10px;left: 750px;font-size: 40px;font-family: 'Magra';letter-spacing: .05em;">0</div>
-		<div id="play" style="position: absolute;top: 100px;left: 150px;font-size: 40px;font-family: 'CompleteInHim';letter-spacing: .05em;">Press SPACEBAR to start</div>
+		<div id="score" style="position: absolute;display: block;top: 10px;left: 750px;font-size: 40px;font-family: 'Magra';letter-spacing: .05em;"></div>
+		<div id="play" style="position: absolute;top: 100px;left: 200px;font-size: 40px;font-family: 'CompleteInHim';letter-spacing: .05em;">Press SPACEBAR to start</div>
 	</div>
 	<script type="text/javascript" src="keyCodes.js"></script>
 	<script type="text/javascript" src="game.js"></script>

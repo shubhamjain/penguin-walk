@@ -11,7 +11,7 @@ var CONFIG = {
 		LAND_UP: KEY_CODES.UP,
 		LAND_DOWN: KEY_CODES.DOWN,
 
-		PAUSE: KEY_CODES.SPACE
+		GAME_START: KEY_CODES.SPACE
 	}
 };
 
@@ -108,7 +108,6 @@ function Scene(sceneGenContext, spriteObj, otherObj)
 	this.landPoints = [];
 	this.curX = 0;
 	this.sceneInitialized = 0;
-	this.landDrawer = 0;
 	this.spriteObj = spriteObj;
 	this.sceneSpeed = CONFIG.INIT_SCENESPEED;
 	this.sceneGenContext = sceneGenContext;
@@ -121,7 +120,7 @@ function Scene(sceneGenContext, spriteObj, otherObj)
 		posX = posX || 0;
 		cloudObj = otherObj[0];
 		sceneGenContext.drawImage(cloudObj, 0, 0, cloudObj.width, cloudObj.height, posX, 0, cloudObj.width, cloudObj.height);
-	}
+	};
 
 	this.initScene = function()
 	{
@@ -131,7 +130,7 @@ function Scene(sceneGenContext, spriteObj, otherObj)
 		this.drawLands(CONFIG.CANVAS_WIDTH);
 			
 		this.sceneInitialized = 1;
-	}
+	};
 
 	this.drawLands = function( basePos )
 	{
@@ -145,7 +144,7 @@ function Scene(sceneGenContext, spriteObj, otherObj)
 			this.drawLand(randomHeight(), 2, basePos +  i * 2 * this.spriteWidth);
 
 		this.drawLand(randomHeight(), (CONFIG.CANVAS_WIDTH - 6 * this.spriteWidth ) / this.spriteWidth, basePos  + ( 6 * this.spriteWidth ) );		
-	}
+	};
 
 	this.requestScene = function() 
 	{
@@ -159,7 +158,7 @@ function Scene(sceneGenContext, spriteObj, otherObj)
 		this.curX += this.sceneSpeed;
 	};
 
-
+	//Updates the size of land.
 	this.updateSceneLand = function( inc ) //inc = 1, increment land height, inc = 0, decrement it.
 	{
 
@@ -204,9 +203,7 @@ function Scene(sceneGenContext, spriteObj, otherObj)
 		}
 
 		for( var i = 1; i < landHeight; i++ )
-		{
 			spriteObj.pushSeriesObject("s" + landType + "-1", posX, CONFIG.CANVAS_HEIGHT -  this.spriteHeight * i, landLength);
-		}
 		
 		spriteObj.pushSeriesObject("g" + landType + "-1", posX, CONFIG.CANVAS_HEIGHT - this.spriteHeight * i, landLength);
 	};
@@ -274,58 +271,74 @@ function Game(realContext, gameObjects)
 		sfxSounds.score_up.play();
 		
 		this.score++;
-		document.getElementById("score").style.display = "block";
 		document.getElementById("score").innerHTML = this.score;
 	};
 
 	this.beginGame = function()
 	{
+		scene.requestScene();
 		this.gameBegun = true;
+		this.gameOver = false;
 
 		var el = document.getElementById("play");
-		el.parentNode.removeChild(el);
-	}
+		el.style.display = "none";
+	};
+
+	this.triggerGameOver = function()
+	{
+		var el = document.getElementById("play");
+		el.style.display = "block";
+
+		this.gameOver = true;
+		this.score = -1;
+		this.gameBegun = false;
+
+		this.incrementScore();
+
+		scene.sceneInitialized = 0;
+		scene.landPoints = [];
+		scene.curX = 0;
+		scene.requestScene();
+	};
 
 	this.checkGameOver = function()
 	{
+		if( this.gameOver )
+			return;
+
 		if(scene.landPoints[0].landHeight < scene.landPoints[1].landHeight ){
 			if(scene.landPoints[0].posX + scene.landPoints[0].width < 40 )
-				this.gameOver = true;
+				this.triggerGameOver();
 		}
 
 		if(scene.landPoints[0].landHeight > scene.landPoints[1].landHeight ){
 			if(scene.landPoints[0].posX + scene.landPoints[0].width < 30 )
-				this.gameOver = true;
+				this.triggerGameOver();
 		}
 	};
 
 	this.showScene = function()
 	{
-		if( this.gameBegun )
-			scene.requestScene();
-		
-		if( this.lastLandHeight != scene.landPoints[0].origHeight )
+		if( this.gameBegun && !this.gameOver)
 		{
-			this.lastLandHeight = scene.landPoints[0].origHeight;
-			this.incrementScore();
+			scene.requestScene();
+			// only increment score if player actually did something
+			// and not just walked on already leveled lands
+			if( this.lastLandHeight != scene.landPoints[0].origHeight )
+			{
+				this.lastLandHeight = scene.landPoints[0].origHeight;
+				this.incrementScore();
+			}
 		}
+		
 
 		realContext.drawImage(scene.sceneGenContext.canvas, scene.curX, 0, CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, 0, 0, CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT);
-		
-		if( this.gameOver )
-		{
-			realContext.drawImage(penguinDead, 0, 0, penguinDead.width, penguinDead.height, CONFIG.PENGUIN_OFFSET, CONFIG.CANVAS_HEIGHT - scene.landPoints[0].landHeight * scene.spriteHeight - scene.spriteHeight, penguinDead.width, penguinDead.height);
-			this.pauseGame();
-		}
-		else
-			penguin.paintFrame(CONFIG.CANVAS_HEIGHT - scene.landPoints[0].landHeight * scene.spriteHeight - scene.spriteHeight);
-
-		var me = this;
+		penguin.paintFrame(CONFIG.CANVAS_HEIGHT - scene.landPoints[0].landHeight * scene.spriteHeight - scene.spriteHeight);
 
 		requestAnimationFrame(function(){
-			me.checkGameOver();
-			me.showScene();
-		});
+			this.checkGameOver();
+			this.showScene();
+		}.bind(this));
 	};
 
 	this.keyHit = function( keyCode ) 
@@ -333,13 +346,13 @@ function Game(realContext, gameObjects)
 		switch(keyCode)
 		{
 			case CONFIG.ACTION_MAP.LAND_UP:
-				scene.updateSceneLand(1);break;
+				if( this.gameBegun ) scene.updateSceneLand(1);break;
 
 			case CONFIG.ACTION_MAP.LAND_DOWN:
-				scene.updateSceneLand(0);break;
+				if( this.gameBegun ) scene.updateSceneLand(0);break;
 
-			case CONFIG.ACTION_MAP.PAUSE:
-				this.beginGame(); break;
+			case CONFIG.ACTION_MAP.GAME_START:
+				this.beginGame();break;
 		}
 	};
 }
@@ -389,7 +402,7 @@ function loadResources(imgPaths, sfxPaths, whenLoaded)
 	});
 }
 
-loadResources(["img/LandTiles.png", "img/Cloud.png", "img/Penguin.png", "img/PenguinDead.png"], ["sfx/score_up.mp3"], init);
+loadResources(["img/LandTiles.png", "img/Cloud.png", "img/Penguin.png"], ["sfx/score_up.mp3"], init);
 
 // Our Game follows an architecture of viewport and window
 // where window is twice the width of game and viewport is
@@ -411,6 +424,7 @@ function init( resArr )
 
 	sceneGenContext = full_window.getContext('2d');
 
+	document.getElementById("main_game").style.display = "block";
 	var sprites = new Sprite(sceneGenContext, imgObj.LandTiles);
 
 	sprites.addObjects({
