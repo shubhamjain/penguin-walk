@@ -7,6 +7,8 @@ var CONFIG = {
 
 	PENGUIN_OFFSET: 10,
 
+	MAX_SPEED: 9,
+
 	ACTION_MAP: {
 		LAND_UP: KEY_CODES.UP,
 		LAND_DOWN: KEY_CODES.DOWN,
@@ -158,8 +160,7 @@ function Scene(sceneGenContext, spriteObj, otherObj)
 		this.curX += this.sceneSpeed;
 	};
 
-	//Updates the size of land.
-	this.updateSceneLand = function( inc ) //inc = 1, increment land height, inc = 0, decrement it.
+	this.updateHeightLand = function( inc ) //inc = 1, increment land height, inc = 0, decrement it.
 	{
 
 		var oldHeight = this.landPoints[0].landHeight, 
@@ -246,7 +247,6 @@ function Scene(sceneGenContext, spriteObj, otherObj)
 		this.paintClouds(CONFIG.CANVAS_WIDTH);
 		this.drawLands(CONFIG.CANVAS_WIDTH);
 		this.curX -= CONFIG.CANVAS_WIDTH;
-
 	};
 }
 
@@ -254,12 +254,12 @@ function Game(realContext, gameObjects)
 {
 	var scene = gameObjects[0],
 		penguin = gameObjects[1],
-		penguinDead = gameObjects[2],
-		sfxSounds = gameObjects[3];
+		sfxSounds = gameObjects[2];
 
 	setInterval(function(){
-		scene.sceneSpeed++;
-	}, CONFIG.INC_INTERVAL * 1000);
+		if( this.gameBegun )
+			scene.sceneSpeed++;
+	}.bind(this), CONFIG.INC_INTERVAL * 1000);
 
 	this.lastLandHeight = 0;
 	this.score = 0;
@@ -270,7 +270,7 @@ function Game(realContext, gameObjects)
 	{
 		sfxSounds.score_up.play();
 		
-		this.score++;
+		this.score += scene.sceneSpeed - CONFIG.INIT_SCENESPEED + 1;
 		document.getElementById("score").innerHTML = this.score;
 	};
 
@@ -280,14 +280,15 @@ function Game(realContext, gameObjects)
 		this.gameBegun = true;
 		this.gameOver = false;
 
-		var el = document.getElementById("play");
+		var el = document.getElementById("play_text");
 		el.style.display = "none";
 	};
 
 	this.triggerGameOver = function()
 	{
-		var el = document.getElementById("play");
+		var el = document.getElementById("play_text");
 		el.style.display = "block";
+		el.innerHTML = "<p>You score was " + this.score + ".</p> <p>Press SPACEBAR to restart</p>";
 
 		this.gameOver = true;
 		this.score = -1;
@@ -298,6 +299,7 @@ function Game(realContext, gameObjects)
 		scene.sceneInitialized = 0;
 		scene.landPoints = [];
 		scene.curX = 0;
+		scene.sceneSpeed = CONFIG.INIT_SCENESPEED;
 		scene.requestScene();
 	};
 
@@ -331,7 +333,6 @@ function Game(realContext, gameObjects)
 			}
 		}
 		
-
 		realContext.drawImage(scene.sceneGenContext.canvas, scene.curX, 0, CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, 0, 0, CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT);
 		penguin.paintFrame(CONFIG.CANVAS_HEIGHT - scene.landPoints[0].landHeight * scene.spriteHeight - scene.spriteHeight);
 
@@ -346,10 +347,10 @@ function Game(realContext, gameObjects)
 		switch(keyCode)
 		{
 			case CONFIG.ACTION_MAP.LAND_UP:
-				if( this.gameBegun ) scene.updateSceneLand(1);break;
+				if( this.gameBegun ) scene.updateHeightLand(1);break;
 
 			case CONFIG.ACTION_MAP.LAND_DOWN:
-				if( this.gameBegun ) scene.updateSceneLand(0);break;
+				if( this.gameBegun ) scene.updateHeightLand(0);break;
 
 			case CONFIG.ACTION_MAP.GAME_START:
 				this.beginGame();break;
@@ -425,6 +426,7 @@ function init( resArr )
 	sceneGenContext = full_window.getContext('2d');
 
 	document.getElementById("main_game").style.display = "block";
+
 	var sprites = new Sprite(sceneGenContext, imgObj.LandTiles);
 
 	sprites.addObjects({
@@ -439,7 +441,7 @@ function init( resArr )
 
 	scene.requestScene();
 	var penguin = new Penguin(imgObj.Penguin, vp_context);
-	var game = new Game(vp_context, [scene, penguin, imgObj.PenguinDead, sfxSounds]);
+	var game = new Game(vp_context, [scene, penguin, sfxSounds]);
 
 	document.addEventListener('keyup', function(event){
 		game.keyHit( event.keyCode );

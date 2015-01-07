@@ -1,29 +1,96 @@
 <!doctype html>
-<head>
-	<style>
-	/* latin */
-	@font-face {
-	  font-family: 'Magra';
-	  font-style: normal;
-	  font-weight: 700;
-	  src: local('Magra Bold'), local('Magra-Bold'), url(fonts/Magra.woff2) format('woff2');
-  	unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
-	}
 
+<head>
+	<link href='http://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
+	<style>
 	@font-face {
 	  font-family: 'CompleteInHim';
 	  font-style: normal;
 	  font-weight: 700;
 	  src: url(fonts/CompleteInHim.ttf);
 	}
+
+	body {
+		background: -webkit-linear-gradient(90deg, #517fa4 10%, #243949 90%); /* Chrome 10+, Saf5.1+ */
+		background:    -moz-linear-gradient(90deg, #517fa4 10%, #243949 90%); /* FF3.6+ */
+		background:     -ms-linear-gradient(90deg, #517fa4 10%, #243949 90%); /* IE10 */
+		background:      -o-linear-gradient(90deg, #517fa4 10%, #243949 90%); /* Opera 11.10+ */
+		background:         linear-gradient(90deg, #517fa4 10%, #243949 90%); /* W3C */
+	} 
+
+	.container {
+		width: 50%;
+		margin: 0 auto;
+	}
+
+	#title {
+	    height: 45px;
+	    background-color: #8CDC65;
+	    border-radius: 5px;
+	    vertical-align: middle;
+	    display: table-cell;
+	    font-family: "Lato";
+	    font-size: 28px;
+	    width: 800px;
+	    text-align: center;
+	    letter-spacing: 2px;
+	    font-weight: 700;
+	}
+
+	#instructions {
+	    background-color: #499DCF;
+	    border-radius: 5px;
+	    font-family: "Lato";
+	    width: 800px;
+	    font-size: 19px;
+	    padding: 5px;
+	}
+
+
+	#main_game {
+		position: relative;
+		display: none;
+		margin-top: 5px;
+	}
+
+	#play_text {
+		position: absolute;
+		top: 100px;
+		text-align: center;
+		left: 200px;
+		font-size: 40px;
+		font-family: 'CompleteInHim';
+		letter-spacing: .05em;
+	}
+
+	#score {
+		position: absolute;
+		display: block;
+		top: 10px;
+		left: 750px;
+		font-size: 32px;
+		font-family: 'Lato';
+		letter-spacing: .05em;
+		font-weight: 800;
+	}
+
+	#play_text > p {
+		margin: 0px;
+	}
+
 	</style>
 </head>
 <body>
-	<div id="main_game" style="position: absolute;display:none;">
-		<canvas id="viewport" style="border: 1px solid #000;"></canvas>
-		<div id="score" style="position: absolute;display: block;top: 10px;left: 750px;font-size: 40px;font-family: 'Magra';letter-spacing: .05em;"></div>
-		<div id="play" style="position: absolute;top: 100px;left: 200px;font-size: 40px;font-family: 'CompleteInHim';letter-spacing: .05em;">Press SPACEBAR to start</div>
+	<div class="container">
+		<div id="title">Penguin Walk</div>
+		<div id="main_game">
+			<canvas id="viewport"></canvas>
+			<div id="score"></div>
+			<div id="play_text"><p>Press SPACEBAR to begin.</p></div>
+		</div>
+		<div id="instructions"> Help to walk the penguin in a straight line by resizing lands. "<strong>Up arrow</strong>" to increase the height of land,"<strong>Down arrow</strong>" to decrease it.</div>
 	</div>
+
 	<script type="text/javascript" src="keyCodes.js"></script>
 	<script type="text/javascript" src="game.js"></script>
 </body>
