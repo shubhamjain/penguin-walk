@@ -116,12 +116,14 @@ function Scene(sceneGenContext, spriteObj, otherObj)
 
 	this.spriteHeight = spriteObj.objects["sground-1"].height;
 	this.spriteWidth = spriteObj.objects["sground-1"].width;
+	
+	this.cloudObj = otherObj[0];	
+	this.sfxSounds = otherObj[1];
 
 	this.paintClouds = function( posX )
 	{
 		posX = posX || 0;
-		cloudObj = otherObj[0];
-		sceneGenContext.drawImage(cloudObj, 0, 0, cloudObj.width, cloudObj.height, posX, 0, cloudObj.width, cloudObj.height);
+		sceneGenContext.drawImage(this.cloudObj, 0, 0, this.cloudObj.width, this.cloudObj.height, posX, 0, this.cloudObj.width, this.cloudObj.height);
 	};
 
 	this.initScene = function()
@@ -166,6 +168,9 @@ function Scene(sceneGenContext, spriteObj, otherObj)
 		var oldHeight = this.landPoints[0].landHeight, 
 			oldOrigHeight = this.landPoints[0].origHeight,
 			i = 0;
+
+		this.sfxSounds.Whoosh.currentTime = 0;
+		this.sfxSounds.Whoosh.play();
 
 		while( typeof this.landPoints[i] !== "undefined" && oldOrigHeight == this.landPoints[i].origHeight )
 		{
@@ -268,7 +273,7 @@ function Game(realContext, gameObjects)
 
 	this.incrementScore = function()
 	{
-		sfxSounds.score_up.play();
+		sfxSounds.Blop.play();
 		
 		this.score += scene.sceneSpeed - CONFIG.INIT_SCENESPEED + 1;
 		document.getElementById("score").innerHTML = this.score;
@@ -365,7 +370,7 @@ function loadResources(imgPaths, sfxPaths, whenLoaded)
 
   	imgPaths.forEach(function(path){
 		var img = document.createElement('img');
-		img.src = path + "?" + Math.random();
+		img.src = path;
 
 		var fileName = path.split(/[\./]/).slice(-2, -1)[0];
 		img.onload = function(){
@@ -385,7 +390,7 @@ function loadResources(imgPaths, sfxPaths, whenLoaded)
 
 	sfxPaths.forEach(function(path){
 		var sfx = document.createElement('audio');
-		sfx.src = path + "?" + Math.random();
+		sfx.src = path;
 
 		var fileName = path.split(/[\./]/).slice(-2, -1)[0];
 		sfx.addEventListener('loadeddata', function(){
@@ -403,7 +408,7 @@ function loadResources(imgPaths, sfxPaths, whenLoaded)
 	});
 }
 
-loadResources(["img/LandTiles.png", "img/Cloud.png", "img/Penguin.png"], ["sfx/score_up.mp3"], init);
+loadResources(["img/LandTiles.png", "img/Cloud.png", "img/Penguin.png"], ["sfx/Blop.wav", "sfx/Whoosh.wav"], init);
 
 // Our Game follows an architecture of viewport and window
 // where window is twice the width of game and viewport is
@@ -437,7 +442,7 @@ function init( resArr )
 		"background": [0, 200, 1, 1]
 	});
 
-	var scene = new Scene(sceneGenContext, sprites, [imgObj.Cloud]);
+	var scene = new Scene(sceneGenContext, sprites, [imgObj.Cloud, sfxSounds]);
 
 	scene.requestScene();
 	var penguin = new Penguin(imgObj.Penguin, vp_context);
