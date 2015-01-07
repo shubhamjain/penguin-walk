@@ -408,7 +408,7 @@ function loadResources(imgPaths, sfxPaths, whenLoaded)
 	});
 }
 
-loadResources(["img/LandTiles.png", "img/Cloud.png", "img/Penguin.png"], ["sfx/Blop.wav", "sfx/Whoosh.wav"], init);
+loadResources(["img/LandTiles.png", "img/Cloud.png", "img/Penguin.png"], ["sfx/Blop.mp3", "sfx/Whoosh.mp3"], init);
 
 // Our Game follows an architecture of viewport and window
 // where window is twice the width of game and viewport is
