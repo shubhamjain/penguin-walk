@@ -28,15 +28,15 @@ function Penguin(imageObj, context)
 	this.context = context;
 	this.width = 75;
 	this.height = 100;
-	this.speed = 7;
+	this.invSpeed = 7; // Penguin walks faster by decreasing this
 	this.counter = 0;
 
 	this.paintFrame = function ( posY )
 	{
-		if ( this.counter >= this.speed * 9 ) 
+		if ( this.counter >= this.invSpeed * 9 ) 
 			this.counter = 0;
 
-		context.drawImage(imageObj, parseInt( this.counter++ / (10 - ( 9 / this.speed)) ) * this.width, 0, this.width, this.height, CONFIG.PENGUIN_OFFSET,  posY, this.width, this.height);
+		context.drawImage(imageObj, parseInt( this.counter++ / (10 - ( 9 / this.invSpeed)) ) * this.width, 0, this.width, this.height, CONFIG.PENGUIN_OFFSET,  posY, this.width, this.height);
 	};
 }
 
@@ -92,10 +92,7 @@ function Sprite(canvasContext, imageObj)
 
 	this.paintBackground = function( posX )
 	{
-		posX = posX || 0;
-
-		objProps = this.objects.background;
-		this.context.drawImage(this.imageObj, objProps.spriteX, objProps.spriteY, objProps.width, objProps.height, posX, 0, CONFIG.CANVAS_WIDTH * 2, CONFIG.CANVAS_HEIGHT);
+		this.paintBackgroundRect(posX || 0, 0, CONFIG.CANVAS_WIDTH * 2, CONFIG.CANVAS_HEIGHT);
 	};
 
 	this.paintBackgroundRect = function(posX, posY, width, height)
@@ -114,8 +111,8 @@ function Scene(sceneGenContext, spriteObj, otherObj)
 	this.sceneSpeed = CONFIG.INIT_SCENESPEED;
 	this.sceneGenContext = sceneGenContext;
 
-	this.spriteHeight = spriteObj.objects["sground-1"].height;
-	this.spriteWidth = spriteObj.objects["sground-1"].width;
+	this.spriteHeight = spriteObj.objects["sground"].height;
+	this.spriteWidth = spriteObj.objects["sground"].width;
 	
 	this.cloudObj = otherObj[0];	
 	this.sfxSounds = otherObj[1];
@@ -180,8 +177,8 @@ function Scene(sceneGenContext, spriteObj, otherObj)
 			if( !inc && this.landPoints[i].landHeight > 1 )
 				--this.landPoints[i].landHeight;
 
-			this.clearLand(this.landPoints[i].posX + this.curX, oldHeight, this.landPoints[i].landLength);
-			this.drawLand(this.landPoints[i].landHeight, this.landPoints[i].landLength, this.landPoints[i].posX + this.curX, true, "ground");
+			this.clearLand(this.landPoints[i].posX, oldHeight, this.landPoints[i].landLength);
+			this.drawLand(this.landPoints[i].landHeight, this.landPoints[i].landLength, this.landPoints[i].posX, true, "ground");
 			
 			i++;
 		}
@@ -209,33 +206,31 @@ function Scene(sceneGenContext, spriteObj, otherObj)
 		}
 
 		for( var i = 1; i < landHeight; i++ )
-			spriteObj.pushSeriesObject("s" + landType + "-1", posX, CONFIG.CANVAS_HEIGHT -  this.spriteHeight * i, landLength);
+			spriteObj.pushSeriesObject("s" + landType, posX, CONFIG.CANVAS_HEIGHT -  this.spriteHeight * i, landLength);
 		
-		spriteObj.pushSeriesObject("g" + landType + "-1", posX, CONFIG.CANVAS_HEIGHT - this.spriteHeight * i, landLength);
+		spriteObj.pushSeriesObject("g" + landType, posX, CONFIG.CANVAS_HEIGHT - this.spriteHeight * i, landLength);
 	};
 
 	this.updateLandPoints = function() 
 	{
-		
-		for( i = 0; i < this.landPoints.length; i++ )
-			this.landPoints[i].posX -= this.sceneSpeed;
-
-		if( (this.landPoints[0].posX + this.landPoints[0].width) < 30 )
+		//Has the land gone out of focus?
+		if( (this.landPoints[0].posX + this.landPoints[0].width - this.curX) < 30 )
 		{
+			// If lands' height are not equal, return, Game object will take care 
+			// of triggering Game Over
 			if( this.landPoints[0].landHeight !== this.landPoints[1].landHeight )
-			{
-				this.gameOver  = true;
 				return;
-			}
-
+			
 			this.landPoints.shift();
 
 		var oldOrigHeight = this.landPoints[0].origHeight,
 			i = 0;
 
+			// Only increase land sizes by comparing them to their original height, so that 
+			// lands only on the same level, rise or fall.
 			while( typeof this.landPoints[i] !== "undefined" && oldOrigHeight == this.landPoints[i].origHeight )
 			{
-				this.drawLand(this.landPoints[i].landHeight, this.landPoints[i].landLength, this.landPoints[i].posX + this.curX + this.sceneSpeed, true, "ground");
+				this.drawLand(this.landPoints[i].landHeight, this.landPoints[i].landLength, this.landPoints[i].posX, true, "ground");
 				i++;
 			}
 		}
@@ -249,6 +244,14 @@ function Scene(sceneGenContext, spriteObj, otherObj)
 		sceneGenContext.drawImage(sceneGenContext.canvas, CONFIG.CANVAS_WIDTH, 0, CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, 0, 0, CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT);
 		spriteObj.paintBackground( CONFIG.CANVAS_WIDTH );
 
+		// Assign new positions to spliced lands
+		var i = 0;
+		while( typeof this.landPoints[i] !== "undefined" )
+		{
+			this.landPoints[i].posX -= CONFIG.CANVAS_WIDTH;
+			i++;
+		}
+
 		this.paintClouds(CONFIG.CANVAS_WIDTH);
 		this.drawLands(CONFIG.CANVAS_WIDTH);
 		this.curX -= CONFIG.CANVAS_WIDTH;
@@ -261,15 +264,19 @@ function Game(realContext, gameObjects)
 		penguin = gameObjects[1],
 		sfxSounds = gameObjects[2];
 
-	setInterval(function(){
-		if( this.gameBegun )
+	var me = this;
+
+	var setSpeedIterator = function(){
+		me.intervalId = setInterval(function(){
 			scene.sceneSpeed++;
-	}.bind(this), CONFIG.INC_INTERVAL * 1000);
+		}, CONFIG.INC_INTERVAL * 1000);
+	};
 
 	this.lastLandHeight = 0;
 	this.score = 0;
 	this.gameBegun = false;
 	this.gameOver = false;
+	this.intervalId = null;
 
 	this.incrementScore = function()
 	{
@@ -281,6 +288,9 @@ function Game(realContext, gameObjects)
 
 	this.beginGame = function()
 	{
+		clearInterval(me.intervalId);
+		setSpeedIterator();
+
 		scene.requestScene();
 		this.gameBegun = true;
 		this.gameOver = false;
@@ -314,12 +324,12 @@ function Game(realContext, gameObjects)
 			return;
 
 		if(scene.landPoints[0].landHeight < scene.landPoints[1].landHeight ){
-			if(scene.landPoints[0].posX + scene.landPoints[0].width < 40 )
+			if(scene.landPoints[0].posX + scene.landPoints[0].width - scene.curX < 40 )
 				this.triggerGameOver();
 		}
 
 		if(scene.landPoints[0].landHeight > scene.landPoints[1].landHeight ){
-			if(scene.landPoints[0].posX + scene.landPoints[0].width < 30 )
+			if(scene.landPoints[0].posX + scene.landPoints[0].width - scene.curX < 30 )
 				this.triggerGameOver();
 		}
 	};
@@ -435,10 +445,10 @@ function init( resArr )
 	var sprites = new Sprite(sceneGenContext, imgObj.LandTiles);
 
 	sprites.addObjects({
-		"gground-1": [36, 18, 107, 90], //Grass Ground 1
-		"sground-1": [36, 170, 107, 90], //Soil Ground 1
-		"gstone-1": [36, 280, 107, 90],
-		"sstone-1": [36, 408, 107, 90],
+		"gground": [36, 18, 107, 90], //Grass Ground 1
+		"sground": [36, 170, 107, 90], //Soil Ground 1
+		"gstone": [36, 280, 107, 90],
+		"sstone": [36, 408, 107, 90],
 		"background": [0, 200, 1, 1]
 	});
 
