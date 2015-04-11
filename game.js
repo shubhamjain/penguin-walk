@@ -291,6 +291,8 @@ function Game(realContext, gameObjects)
 		clearInterval(me.intervalId);
 		setSpeedIterator();
 
+		scene.sceneSpeed = CONFIG.INIT_SCENESPEED;
+
 		scene.requestScene();
 		this.gameBegun = true;
 		this.gameOver = false;
