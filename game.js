@@ -445,11 +445,11 @@ function init( resArr )
 	var sprites = new Sprite(sceneGenContext, imgObj.LandTiles);
 
 	sprites.addObjects({
-		"gground": [36, 18, 107, 90], //Grass Ground 1
-		"sground": [36, 170, 107, 90], //Soil Ground 1
-		"gstone": [36, 280, 107, 90],
-		"sstone": [36, 408, 107, 90],
-		"background": [0, 200, 1, 1]
+		"gground": [36, 19, 107, 90], //Grass Ground 1
+		"sground": [36, 171, 107, 90], //Soil Ground 1
+		"gstone": [36, 281, 107, 90],
+		"sstone": [36, 409, 107, 90],
+		"background": [0, 0, 1, 1]
 	});
 
 	var scene = new Scene(sceneGenContext, sprites, [imgObj.Cloud, sfxSounds]);
