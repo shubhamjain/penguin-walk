@@ -36,6 +36,7 @@ function Penguin(imageObj, context)
 		if ( this.counter >= this.invSpeed * 9 ) 
 			this.counter = 0;
 
+		// Magic
 		context.drawImage(imageObj, parseInt( this.counter++ / (10 - ( 9 / this.invSpeed)) ) * this.width, 0, this.width, this.height, CONFIG.PENGUIN_OFFSET,  posY, this.width, this.height);
 	};
 }
@@ -86,6 +87,8 @@ function Sprite(canvasContext, imageObj)
 			this.pushObject(objName, Math.round(x + objProps.width * i), y);
 		}
 
+		// If push series object is not a whole integer, 
+		// then paint the partial object
 		if( (count - i) !== 0 )
 			this.pushPartialObject(objName,  Math.round(x + objProps.width * i), y, Math.abs(count - i));
 	};
@@ -144,6 +147,8 @@ function Scene(sceneGenContext, spriteObj, otherObj)
 		for ( i = 0; i < 3; i++ )
 			this.drawLand(randomHeight(), 2, basePos +  i * 2 * this.spriteWidth);
 
+		// The length of the last land in our fixed width canvas scene will not be a positive integer
+		// So calculate and paint the length of last land.
 		this.drawLand(randomHeight(), (CONFIG.CANVAS_WIDTH - 6 * this.spriteWidth ) / this.spriteWidth, basePos  + ( 6 * this.spriteWidth ) );		
 	};
 
@@ -165,6 +170,9 @@ function Scene(sceneGenContext, spriteObj, otherObj)
 		var oldHeight = this.landPoints[0].landHeight, 
 			oldOrigHeight = this.landPoints[0].origHeight,
 			i = 0;
+
+		// If sound is already playing, reset its 
+		// currentTime to 0, before playing.
 
 		this.sfxSounds.Whoosh.currentTime = 0;
 		this.sfxSounds.Whoosh.play();
@@ -193,6 +201,9 @@ function Scene(sceneGenContext, spriteObj, otherObj)
 	{
 		landType = landType || "stone";
 
+		// noPush is set true when new land is not drawn
+		// instead type of old one is changed ( stone to grass )
+		// when Penguin walks over it.
 		if( noPush !== true )
 		{
 			this.landPoints.push({
@@ -351,6 +362,8 @@ function Game(realContext, gameObjects)
 		}
 		
 		realContext.drawImage(scene.sceneGenContext.canvas, scene.curX, 0, CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, 0, 0, CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT);
+		
+		//Paint the frame of animated penguin on the final scene
 		penguin.paintFrame(CONFIG.CANVAS_HEIGHT - scene.landPoints[0].landHeight * scene.spriteHeight - scene.spriteHeight);
 
 		requestAnimationFrame(function(){
