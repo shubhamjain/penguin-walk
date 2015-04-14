@@ -133,7 +133,6 @@ function Scene(sceneGenContext, spriteObj, otherObj)
 		this.drawLands();
 		this.drawLands(CONFIG.CANVAS_WIDTH);
 			
-		this.sceneInitialized = 1;
 	};
 
 	this.drawLands = function( basePos )
@@ -154,9 +153,6 @@ function Scene(sceneGenContext, spriteObj, otherObj)
 
 	this.requestScene = function() 
 	{
-		if( this.sceneInitialized === 0 )
-			this.initScene();
-
 		if( CONFIG.CANVAS_WIDTH - this.curX <= 0)
 			this.generateScene();
 
@@ -328,7 +324,8 @@ function Game(realContext, gameObjects)
 		scene.landPoints = [];
 		scene.curX = 0;
 		scene.sceneSpeed = CONFIG.INIT_SCENESPEED;
-		scene.requestScene();
+
+		scene.initScene();
 	};
 
 	this.checkGameOver = function()
@@ -469,7 +466,7 @@ function init( resArr )
 
 	var scene = new Scene(sceneGenContext, sprites, [imgObj.Cloud, sfxSounds]);
 
-	scene.requestScene();
+	scene.initScene();
 	var penguin = new Penguin(imgObj.Penguin, vp_context);
 	var game = new Game(vp_context, [scene, penguin, sfxSounds]);
 
