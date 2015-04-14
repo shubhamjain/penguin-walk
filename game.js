@@ -70,19 +70,19 @@ function Sprite(canvasContext, imageObj)
 
 	this.pushObject = function ( objName, x, y )
 	{
-		objProps = this.objects[objName];
+		var objProps = this.objects[objName];
 		this.context.drawImage(this.imageObj, objProps.spriteX, objProps.spriteY, objProps.width, objProps.height, x, y, objProps.width, objProps.height);
 	};
 
 	this.pushPartialObject = function ( objName, x, y, partialFactor )
 	{
-		objProps = this.objects[objName];
+		var objProps = this.objects[objName];
 		this.context.drawImage(this.imageObj, objProps.spriteX, objProps.spriteY, Math.round(objProps.width * partialFactor), objProps.height, x, y, Math.round(objProps.width * partialFactor), objProps.height);
 	};
 
 	this.pushSeriesObject = function ( objName, x, y, count)
 	{
-		objProps = this.objects[objName];
+		var objProps = this.objects[objName];
 		for ( var i = 0; i < Math.round(count); i++ ){
 			this.pushObject(objName, Math.round(x + objProps.width * i), y);
 		}
@@ -100,7 +100,7 @@ function Sprite(canvasContext, imageObj)
 
 	this.paintBackgroundRect = function(posX, posY, width, height)
 	{
-		objProps = this.objects.background;
+		var objProps = this.objects.background;
 		this.context.drawImage(this.imageObj, objProps.spriteX, objProps.spriteY, objProps.width, objProps.height, posX, posY, width, height);
 	};
 }
@@ -144,7 +144,7 @@ function Scene(sceneGenContext, spriteObj, otherObj)
 			return Math.floor( Math.random() * 10 % 3 ) + 1;
 		};
 
-		for ( i = 0; i < 3; i++ )
+		for ( var i = 0; i < 3; i++ )
 			this.drawLand(randomHeight(), 2, basePos +  i * 2 * this.spriteWidth);
 
 		// The length of the last land in our fixed width canvas scene will not be a positive integer
@@ -364,7 +364,7 @@ function Game(realContext, gameObjects)
 		realContext.drawImage(scene.sceneGenContext.canvas, scene.curX, 0, CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, 0, 0, CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT);
 		
 		//Paint the frame of animated penguin on the final scene
-		penguin.paintFrame(CONFIG.CANVAS_HEIGHT - scene.landPoints[0].landHeight * scene.spriteHeight - scene.spriteHeight);
+		penguin.paintFrame(CONFIG.CANVAS_HEIGHT - (scene.landPoints[0].landHeight + 1) * scene.spriteHeight);
 
 		requestAnimationFrame(function(){
 			this.checkGameOver();
